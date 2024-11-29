@@ -86,7 +86,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/inventivetalentdev/mineskinclient</url>
+            <url>https://maven.pkg.github.com/Suiranoil/MineskinClient</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -98,12 +98,9 @@
 
     <distributionManagement>
         <repository>
-            <id>sonatype-nexus-releases</id>
-            <url>https://repo.inventivetalent.org/repository/maven-releases/</url>
+            <id>github</id>
+            <name>GitHub Suiranoil Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/Suiranoil/MineskinClient</url>
         </repository>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://repo.inventivetalent.org/repository/maven-snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 </project>
