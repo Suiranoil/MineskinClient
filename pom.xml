@@ -84,9 +84,8 @@
             <url>https://repo.inventivetalent.org/repository/public/</url>
         </repository>
         <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Suiranoil/MineskinClient</url>
+            <id>lionarius-reposilite</id>
+            <url>https://reposilite.lionarius.ru/releases</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -98,9 +97,8 @@
 
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub Suiranoil Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/Suiranoil/MineskinClient</url>
+            <id>lionarius-reposilite</id>
+            <url>https://reposilite.lionarius.ru/releases</url>
         </repository>
     </distributionManagement>
 </project>
