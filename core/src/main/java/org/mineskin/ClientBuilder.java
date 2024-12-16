@@ -131,6 +131,7 @@ public class ClientBuilder {
             getExecutor = Executors.newSingleThreadExecutor(r -> {
                 Thread thread = new Thread(r);
                 thread.setName("MineSkinClient/get");
+                thread.setDaemon(true);
                 return thread;
             });
         }
@@ -138,6 +139,7 @@ public class ClientBuilder {
             generateExecutor = Executors.newSingleThreadExecutor(r -> {
                 Thread thread = new Thread(r);
                 thread.setName("MineSkinClient/generate");
+                thread.setDaemon(true);
                 return thread;
             });
         }
@@ -146,6 +148,7 @@ public class ClientBuilder {
             generateRequestScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread thread = new Thread(r);
                 thread.setName("MineSkinClient/scheduler");
+                thread.setDaemon(true);
                 return thread;
             });
         }
