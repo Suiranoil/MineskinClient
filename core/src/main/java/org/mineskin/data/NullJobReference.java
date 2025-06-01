@@ -2,9 +2,9 @@ package org.mineskin.data;
 
 import java.util.Optional;
 
-public class NullJobReference implements JobReference{
+public class NullJobReference implements JobReference {
 
-    private final JobInfo job;
+    private JobInfo job;
 
     public NullJobReference(JobInfo job) {
         this.job = job;

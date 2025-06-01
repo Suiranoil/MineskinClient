@@ -9,10 +9,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class JobInfo {
 
-    private final String id;
-    private final JobStatus status;
-    private final long timestamp;
-    private final String result;
+    private String id;
+    private JobStatus status;
+    private long timestamp;
+    private String result;
 
     public JobInfo(String id, JobStatus status, long timestamp, String result) {
         this.id = id;

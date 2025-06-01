@@ -2,15 +2,15 @@ package org.mineskin.data;
 
 public class SkinInfo implements Skin {
 
-    private final String uuid;
-    private final String name;
-    private final Variant variant;
-    private final Visibility visibility;
-    private final TextureInfo texture;
-    private final GeneratorInfo generator;
+    private String uuid;
+    private String name;
+    private Variant variant;
+    private Visibility visibility;
+    private TextureInfo texture;
+    private GeneratorInfo generator;
 
-    private final int views;
-    private final boolean duplicate;
+    private int views;
+    private boolean duplicate;
 
     public SkinInfo(String uuid, String name, Variant variant, Visibility visibility, TextureInfo texture, GeneratorInfo generator, int views, boolean duplicate) {
         this.uuid = uuid;
