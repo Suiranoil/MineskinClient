@@ -4,13 +4,19 @@ import java.util.Objects;
 
 public final class SkinHashes {
     private String skin;
+    private String cape;
 
-    public SkinHashes(String skin) {
+    public SkinHashes(String skin, String cape) {
         this.skin = skin;
+        this.cape = cape;
     }
 
     public String skin() {
         return skin;
+    }
+
+    public String cape() {
+        return cape;
     }
 
     @Override
@@ -18,7 +24,7 @@ public final class SkinHashes {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (SkinHashes) obj;
-        return Objects.equals(this.skin, that.skin);
+        return Objects.equals(this.skin, that.skin) && Objects.equals(this.cape, that.cape) ;
     }
 
     @Override
@@ -26,10 +32,11 @@ public final class SkinHashes {
         return Objects.hash(skin);
     }
 
-    @Override
+    @OverrideAdd commentMore actions
     public String toString() {
         return "SkinHashes[" +
-                "skin=" + skin + ']';
+                "skin=" + skin + ", " +
+                "cape=" + cape + ']';
     }
 
 }

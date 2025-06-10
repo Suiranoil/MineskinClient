@@ -4,13 +4,19 @@ import java.util.Objects;
 
 public final class SkinUrls {
     private String skin;
+    private String cape;
 
-    public SkinUrls(String skin) {
+    public SkinUrls(String skin, String cape) {
         this.skin = skin;
+        this.cape = cape;
     }
 
     public String skin() {
         return skin;
+    }
+
+    public String cape() {
+        return cape;
     }
 
     @Override
@@ -18,7 +24,7 @@ public final class SkinUrls {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (SkinUrls) obj;
-        return Objects.equals(this.skin, that.skin);
+        return Objects.equals(this.skin, that.skin) && Objects.equals(this.cape, that.cape);
     }
 
     @Override
@@ -29,7 +35,7 @@ public final class SkinUrls {
     @Override
     public String toString() {
         return "SkinUrls[" +
-                "skin=" + skin + ']';
+                "skin=" + skin + ", " +
+                "cape=" + cape + ']';
     }
-
 }

@@ -11,15 +11,24 @@ import java.util.logging.Level;
 
 public class ClientBuilder {
 
+    private static final int DEFAULT_GENERATE_QUEUE_INTERVAL = 200;
+    private static final int DEFAULT_GENERATE_QUEUE_CONCURRENCY = 1;
+    private static final int DEFAULT_GET_QUEUE_INTERVAL = 100;
+    private static final int DEFAULT_GET_QUEUE_CONCURRENCY = 5;
+    private static final int DEFAULT_JOB_CHECK_INTERVAL = 1000;
+    private static final int DEFAULT_JOB_CHECK_INITIAL_DELAY = 2000;
+    private static final int DEFAULT_JOB_CHECK_MAX_ATTEMPTS = 10;
+
+    private String baseUrl = "https://api.mineskin.org";
     private String userAgent = "MineSkinClient";
     private String apiKey = null;
     private int timeout = 10000;
     private Gson gson = new Gson();
     private Executor getExecutor = null;
     private Executor generateExecutor = null;
-    private ScheduledExecutorService generateRequestScheduler = null;
-    private ScheduledExecutorService getRequestScheduler = null;
-    private ScheduledExecutorService jobCheckScheduler = null;
+    private QueueOptions generateQueueOptions = null;
+    private QueueOptions getQueueOptions = null;
+    private JobCheckOptions jobCheckOptions = null;
     private RequestHandlerConstructor requestHandlerConstructor = null;
 
     private ClientBuilder() {
@@ -30,6 +39,16 @@ public class ClientBuilder {
      */
     public static ClientBuilder create() {
         return new ClientBuilder();
+    }
+
+    /**
+     * Set the base URL for the API
+     *
+     * @param baseUrl the base URL, e.g. "<a href="https://api.mineskin.org">https://api.mineskin.org</a>"
+     */
+    public ClientBuilder baseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+        return this;
     }
 
     /**
@@ -82,28 +101,63 @@ public class ClientBuilder {
 
     /**
      * Set the ScheduledExecutorService for submitting queue jobs
+     *
+     * @deprecated use {@link #generateQueueOptions(QueueOptions)} instead
      */
+    @Deprecated
     public ClientBuilder generateRequestScheduler(ScheduledExecutorService scheduledExecutor) {
-        this.generateRequestScheduler = scheduledExecutor;
+        this.generateQueueOptions = new QueueOptions(scheduledExecutor, DEFAULT_GENERATE_QUEUE_INTERVAL, DEFAULT_GENERATE_QUEUE_CONCURRENCY);
+        return this;
+    }
+
+    /**
+     * Set the options for submitting queue jobs<br/>
+     * defaults to 200ms interval and 1 concurrent request
+     */
+    public ClientBuilder generateQueueOptions(QueueOptions queueOptions) {
+        this.generateQueueOptions = queueOptions;
         return this;
     }
 
     /**
      * Set the ScheduledExecutorService for get requests, e.g. getting skins
+     *
+     * @deprecated use {@link #getQueueOptions(QueueOptions)} instead
      */
+    @Deprecated
     public ClientBuilder getRequestScheduler(ScheduledExecutorService scheduledExecutor) {
-        this.getRequestScheduler = scheduledExecutor;
+        this.getQueueOptions = new QueueOptions(scheduledExecutor, DEFAULT_GET_QUEUE_INTERVAL, DEFAULT_GET_QUEUE_CONCURRENCY);
+        return this;
+    }
+
+    /**
+     * Set the options for get requests, e.g. getting skins<br/>
+     * defaults to 100ms interval and 5 concurrent requests
+     */
+    public ClientBuilder getQueueOptions(QueueOptions queueOptions) {
+        this.getQueueOptions = queueOptions;
         return this;
     }
 
     /**
      * Set the ScheduledExecutorService for checking job status
+     *
+     * @deprecated use {@link #jobCheckOptions(JobCheckOptions)} instead
      */
+    @Deprecated
     public ClientBuilder jobCheckScheduler(ScheduledExecutorService scheduledExecutor) {
-        this.jobCheckScheduler = scheduledExecutor;
+        this.jobCheckOptions = new JobCheckOptions(scheduledExecutor, DEFAULT_JOB_CHECK_INTERVAL, DEFAULT_JOB_CHECK_INITIAL_DELAY, DEFAULT_JOB_CHECK_MAX_ATTEMPTS);
         return this;
     }
 
+    /**
+     * Set the options for checking job status<br/>
+     * defaults to 1000ms interval, 2000ms initial delay, and 10 max attempts
+     */
+    public ClientBuilder jobCheckOptions(JobCheckOptions jobCheckOptions) {
+        this.jobCheckOptions = jobCheckOptions;
+        return this;
+    }
 
     /**
      * Set the constructor for the RequestHandler
@@ -121,10 +175,17 @@ public class ClientBuilder {
             throw new IllegalStateException("RequestHandlerConstructor is not set");
         }
         if ("MineSkinClient".equals(userAgent)) {
-            MineSkinClientImpl.LOGGER.log(Level.WARNING, "Using default User-Agent: MineSkinClient - Please set a custom User-Agent");
+            MineSkinClientImpl.LOGGER.log(Level.WARNING, "Using default User-Agent: MineSkinClient - Please set a custom User-Agent (e.g. AppName/Version) to identify your application");
         }
-        if (apiKey == null) {
-            MineSkinClientImpl.LOGGER.log(Level.WARNING, "Creating MineSkinClient without API key");
+        if (apiKey == null || apiKey.isBlank()) {
+            apiKey = null;
+            MineSkinClientImpl.LOGGER.log(Level.WARNING, "Creating MineSkinClient without API key - Please get an API key from https://account.mineskin.org/keys");
+        } else if (apiKey.startsWith("msk_")) {
+            String[] split = apiKey.split("_", 3);
+            if (split.length == 3) {
+                String id = split[1];
+                MineSkinClientImpl.LOGGER.log(Level.FINE, "Creating MineSkinClient with API key: " + id);
+            }
         }
 
         if (getExecutor == null) {
@@ -144,23 +205,36 @@ public class ClientBuilder {
             });
         }
 
-        if (generateRequestScheduler == null) {
-            generateRequestScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread thread = new Thread(r);
-                thread.setName("MineSkinClient/scheduler");
-                thread.setDaemon(true);
-                return thread;
-            });
+        if (generateQueueOptions == null) {
+            generateQueueOptions = new QueueOptions(
+                    Executors.newSingleThreadScheduledExecutor(r -> {
+                        Thread thread = new Thread(r);
+                        thread.setName("MineSkinClient/scheduler");
+                        thread.setDaemon(true);
+                        return thread;
+                    }),
+                    DEFAULT_GENERATE_QUEUE_INTERVAL,
+                    DEFAULT_GENERATE_QUEUE_CONCURRENCY
+            );
         }
-        if (getRequestScheduler == null) {
-            getRequestScheduler = generateRequestScheduler;
+        if (getQueueOptions == null) {
+            getQueueOptions = new QueueOptions(
+                    generateQueueOptions.scheduler(),
+                    DEFAULT_GET_QUEUE_INTERVAL,
+                    DEFAULT_GET_QUEUE_CONCURRENCY
+            );
         }
-        if (jobCheckScheduler == null) {
-            jobCheckScheduler = generateRequestScheduler;
+        if (jobCheckOptions == null) {
+            jobCheckOptions = new JobCheckOptions(
+                    generateQueueOptions.scheduler(),
+                    DEFAULT_JOB_CHECK_INTERVAL,
+                    DEFAULT_JOB_CHECK_INITIAL_DELAY,
+                    DEFAULT_JOB_CHECK_MAX_ATTEMPTS
+            );
         }
 
-        RequestHandler requestHandler = requestHandlerConstructor.construct(userAgent, apiKey, timeout, gson);
-        RequestExecutors executors = new RequestExecutors(getExecutor, generateExecutor, generateRequestScheduler, getRequestScheduler, jobCheckScheduler);
+        RequestHandler requestHandler = requestHandlerConstructor.construct(baseUrl, userAgent, apiKey, timeout, gson);
+        RequestExecutors executors = new RequestExecutors(getExecutor, generateExecutor, generateQueueOptions, getQueueOptions, jobCheckOptions);
         return new MineSkinClientImpl(requestHandler, executors);
     }
 

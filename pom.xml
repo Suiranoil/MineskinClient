@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.mineskin</groupId>
-    <artifactId>client-parent</artifactId>
-    <version>PARENT-SNAPSHOT</version>
+    <artifactId>java-client-parent</artifactId>
+    <version>3.0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
@@ -16,7 +16,6 @@
     </modules>
 
     <properties>
-        <revision>3.0.1-SNAPSHOT</revision>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
