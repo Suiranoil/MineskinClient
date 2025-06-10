@@ -32,7 +32,7 @@ public final class SkinHashes {
         return Objects.hash(skin);
     }
 
-    @OverrideAdd commentMore actions
+    @Override
     public String toString() {
         return "SkinHashes[" +
                 "skin=" + skin + ", " +
